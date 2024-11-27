@@ -41,8 +41,8 @@ std::vector<std::pair<int, int>> a_star(std::vector<std::vector<uint8_t>>& maze,
                                         const std::pair<uint8_t, uint8_t>& start,
                                         const std::pair<uint8_t, uint8_t>& goal) {
     const uint8_t VISITED_FLAG = 0b10000000; // Bit 7 it is used to mark the cell as vistied or not
-    const int rows = maze.size();
-    const int cols = maze[0].size();
+    const int rows = maze[0].size();
+    const int cols = maze.size();
     std::priority_queue<Cell> open_list;
     std::unordered_map<int, std::pair<int, int>> parent;                    //path reconstruction
 
@@ -97,11 +97,11 @@ std::vector<std::pair<int, int>> a_star(std::vector<std::vector<uint8_t>>& maze,
 
 
 int main() {
-    const uint8_t rows = 20;
-    const uint8_t cols = 20;
+    const uint8_t rows = 20+21;
+    const uint8_t cols = 20+21;
+    const uint8_t goal_x = 2 * 17 + 1;
+    const uint8_t goal_y = 2* 15 + 1; 
     const uint8_t max_distance = rows + cols - 2;
-    const uint8_t goal_x = 17;
-    const uint8_t goal_y = 15; 
 
     // Open the binary file
     std::ifstream inputFile("maze.bin", std::ios::binary);
@@ -116,6 +116,14 @@ int main() {
         inputFile.read(reinterpret_cast<char*>(maze[i].data()), cols * sizeof(uint8_t));
     }
 
+    // print the maze
+    for (int y = 0; y < rows; ++y) {
+        for (int x = 0; x < cols; ++x) {
+            std::cout << static_cast<int>(maze[y][x]) << " ";
+        }
+        std::cout << std::endl;
+    }
+
     inputFile.close();
     //calculate the heuristic for each cell in the maze
     for (int y = 0; y < rows; ++y) {
@@ -127,8 +135,8 @@ int main() {
         }
     }
 
-    std::pair<int, int> start = {0, 1}; 
-    std::pair<int, int> goal = {17, 15};
+    std::pair<int, int> start = {2 * 0 + 1, 2 * 1 + 1}; 
+    std::pair<int, int> goal = {2 * 17 + 1, 2 * 15 + 1};
     auto path = a_star(maze, start, goal);
     if (!path.empty()) {
         std::cout << "Path found:\n";
@@ -141,11 +149,11 @@ int main() {
         for (int y = 0; y < rows; ++y) {
             for (int x = 0; x < cols; ++x) {
                 if (std::find(path.begin(), path.end(), std::make_pair(y, x)) != path.end()) {
-                    std::cout << " * "; // Mark path
+                    std::cout << "*"; // Mark path
                 } else if (maze[y][x] & 1) {
-                    std::cout << " W "; // Wall
+                    std::cout << "W"; // Wall
                 } else {
-                    std::cout << "   "; // Empty path
+                    std::cout << " "; // Empty path
                 }
             }
             std::cout << std::endl;
@@ -153,6 +161,5 @@ int main() {
     } else {
         std::cout << "No path found!" << std::endl;
     }
-
     return 0;
 }
