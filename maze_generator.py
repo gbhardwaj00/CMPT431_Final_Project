@@ -26,5 +26,5 @@ if __name__ == '__main__':
     print(m.tostring(True, True))
     
     maze = np.array(m.grid, dtype=np.uint8)
-    print(maze)
+    # print(maze)
     maze.tofile('maze.bin')

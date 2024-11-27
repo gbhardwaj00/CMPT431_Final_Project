@@ -11,11 +11,10 @@
 struct Cell
 {
     uint8_t x,y;
-    int cost;
     int f_cost;
-    Cell() : x(0), y(0), cost(0), f_cost(0) {}
-    Cell(uint8_t x, uint8_t y, int cost, int f_cost)
-        : x(x), y(y), cost(cost), f_cost(f_cost) {}
+    Cell() : x(0), y(0), f_cost(0) {}
+    Cell(uint8_t x, uint8_t y, int f_cost)
+        : x(x), y(y), f_cost(f_cost) {}
     //overloadded_operator to compare the f_cost cells
     bool operator<(const Cell& rhs) const
     {
@@ -23,9 +22,8 @@ struct Cell
     }
 };
 //we need a predermined goal location to calculate the heuristic
-int calculate_heuristic(int x, int y, int goal_x, int goal_y, int max_dist) {
-    int raw_heuristic = abs(x - goal_x) + abs(y - goal_y);   
-    return std::round(raw_heuristic * 7.0 / max_dist);     //scaling in the range of 0 to 7
+int calculate_heuristic(int x, int y, int goal_x, int goal_y) {
+    return abs(x - goal_x) + abs(y - goal_y);     //scaling in the range of 0 to 7
 }
 
 int extract_heurestic(uint8_t cell_value)
@@ -47,8 +45,10 @@ std::vector<std::pair<int, int>> a_star(std::vector<std::vector<uint8_t>>& maze,
     std::unordered_map<int, std::pair<int, int>> parent;                    //path reconstruction
 
     
-    open_list.push({start.first, start.second, 0, extract_heurestic(maze[start.first][start.second])});
-    parent [start.first * cols + start.second] = {-1, -1}; //start node has no parent
+    // Push the start cell into the open list
+    int start_heuristic = calculate_heuristic(start.first, start.second, goal.first, goal.second);
+    open_list.push({start.first, start.second, start_heuristic});
+    parent[start.first * cols + start.second] = {-1, -1}; //start node has no parent
     std::vector<std::pair<int, int>> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; //up, down, left, right
 
     while(!open_list.empty())
@@ -80,11 +80,10 @@ std::vector<std::pair<int, int>> a_star(std::vector<std::vector<uint8_t>>& maze,
                 continue;
             }
             
-            int heuristic = extract_heurestic(maze[nx][ny]);
-            int g_cost = current.cost + 1;
-            int f_cost = g_cost + heuristic;
+             int heuristic = calculate_heuristic(nx, ny, goal.first, goal.second);
+            int f_cost = heuristic;
 
-            Cell neighbor(nx, ny, g_cost, f_cost);  
+            Cell neighbor(nx, ny, f_cost);  
             open_list.push(neighbor);
 
             parent[nx * cols + ny] = {current.x, current.y}; //store the parent of the current cell
@@ -116,26 +115,16 @@ int main() {
         inputFile.read(reinterpret_cast<char*>(maze[i].data()), cols * sizeof(uint8_t));
     }
 
-    // print the maze
-    for (int y = 0; y < rows; ++y) {
-        for (int x = 0; x < cols; ++x) {
-            std::cout << static_cast<int>(maze[y][x]) << " ";
-        }
-        std::cout << std::endl;
-    }
+    // // print the maze
+    // for (int y = 0; y < rows; ++y) {
+    //     for (int x = 0; x < cols; ++x) {
+    //         std::cout << static_cast<int>(maze[y][x]);
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     inputFile.close();
-    //calculate the heuristic for each cell in the maze
-    for (int y = 0; y < rows; ++y) {
-        for (int x = 0; x < cols; ++x) {
-            if (maze[y][x] == 0){
-                int heuristic = calculate_heuristic(x, y, goal_x, goal_y, max_distance);
-                maze[y][x] = (heuristic << 1) | 0; // Store the heuristic in the maze
-            }
-        }
-    }
-
-    std::pair<int, int> start = {2 * 0 + 1, 2 * 1 + 1}; 
+    std::pair<int, int> start = {0, 1}; 
     std::pair<int, int> goal = {2 * 17 + 1, 2 * 15 + 1};
     auto path = a_star(maze, start, goal);
     if (!path.empty()) {
@@ -148,10 +137,14 @@ int main() {
         // Render the maze with the path
         for (int y = 0; y < rows; ++y) {
             for (int x = 0; x < cols; ++x) {
-                if (std::find(path.begin(), path.end(), std::make_pair(y, x)) != path.end()) {
+                if (std::make_pair(y, x) == start) {
+                    std::cout << "S"; // Start
+                } else if (std::make_pair(y, x) == goal) {
+                    std::cout << "E"; // Goal
+                } else if (std::find(path.begin(), path.end(), std::make_pair(y, x)) != path.end()) {
                     std::cout << "*"; // Mark path
                 } else if (maze[y][x] & 1) {
-                    std::cout << "W"; // Wall
+                    std::cout << "#"; // Wall
                 } else {
                     std::cout << " "; // Empty path
                 }
