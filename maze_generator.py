@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     m.solver = RandomMouse()
     m.start = (0, 1)
-    m.end = (17, 15)
+    m.end = (2 * 17 + 1, 2 * 15 + 1)
     # print("Maze")
     # print(m.tostring(True))
     
@@ -25,6 +25,6 @@ if __name__ == '__main__':
     print("Solution")
     print(m.tostring(True, True))
     
-    maze = np.array(m.grid, dtype=np.uint8)
-    # print(maze)
+    maze = np.array(m.grid, dtype=np.uint16)
+    print(maze)
     maze.tofile('maze.bin')
