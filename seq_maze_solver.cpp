@@ -5,8 +5,10 @@
 #include <cmath>
 #include <unordered_map>
 #include <algorithm>
+#include "core/get_time.h"
 using namespace std;
 
+#define TIME_PRECISION 10
 
 struct Cell
 {
@@ -85,8 +87,6 @@ vector<pair<int, int>> a_star(vector<vector<uint16_t>>& maze,
     return {}; // Return an empty path if no path found
 }
 
-
-
 int main(int argc, char* argv[]) {
     uint16_t logical_size = stoi(argv[1]); // Logical size of the maze
     const uint16_t rows = 2 * logical_size + 1;
@@ -107,8 +107,14 @@ int main(int argc, char* argv[]) {
     inputFile.close();
 
     pair<int, int> start = {0, 1}; 
-    pair<int, int> goal = {2 * 17 + 1, 2 * 15 + 1};
+    pair<int, int> goal = {2 * 125 + 1, 2 * 130 + 1};
+    
+    timer serial_timer;
+    double time_taken = 0.0;
     auto path = a_star(maze, start, goal);
+    time_taken = serial_timer.total();
+    cout << "Time taken: " << fixed << setprecision(TIME_PRECISION) << time_taken << " seconds" << endl;
+
     if (!path.empty()) {
         cout << "Path found:\n";
         for (const auto& p : path) {
@@ -117,22 +123,22 @@ int main(int argc, char* argv[]) {
         cout << endl;
 
         // Render the maze with the path
-        for (int y = 0; y < rows; ++y) {
-            for (int x = 0; x < cols; ++x) {
-                if (make_pair(y, x) == start) {
-                    cout << "S"; // Start
-                } else if (make_pair(y, x) == goal) {
-                    cout << "E"; // Goal
-                } else if (find(path.begin(), path.end(), make_pair(y, x)) != path.end()) {
-                    cout << "*"; // Mark path
-                } else if (maze[y][x] & 1) {
-                    cout << "#"; // Wall
-                } else {
-                    cout << " "; // Empty path
-                }
-            }
-            cout << endl;
-        }
+        // for (int y = 0; y < rows; ++y) {
+        //     for (int x = 0; x < cols; ++x) {
+        //         if (make_pair(y, x) == start) {
+        //             cout << "S"; // Start
+        //         } else if (make_pair(y, x) == goal) {
+        //             cout << "E"; // Goal
+        //         } else if (find(path.begin(), path.end(), make_pair(y, x)) != path.end()) {
+        //             cout << "*"; // Mark path
+        //         } else if (maze[y][x] & 1) {
+        //             cout << "#"; // Wall
+        //         } else {
+        //             cout << " "; // Empty path
+        //         }
+        //     }
+        //     cout << endl;
+        // }
     } else {
         cout << "No path found!" << endl;
     }

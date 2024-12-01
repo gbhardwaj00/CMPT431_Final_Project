@@ -8,22 +8,22 @@ import numpy as np
 
 if __name__ == '__main__':
     m = Maze()
-    m.generator = DungeonRooms(20, 20)
+    m.generator = DungeonRooms(150, 150)
     m.generate()
 
     # print("Maze")
     # print(m.tostring())
 
-    m.solver = RandomMouse()
-    m.start = (0, 1)
-    m.end = (2 * 17 + 1, 2 * 15 + 1)
+    # m.solver = RandomMouse()
+    # m.start = (0, 1)
+    # m.end = (2 * 250 + 1, 2 * 462 + 1)
     # print("Maze")
     # print(m.tostring(True))
     
-    m.solve()
+    # m.solve()
     
-    print("Solution")
-    print(m.tostring(True, True))
+    # print("Solution")
+    # print(m.tostring(True, True))
     
     maze = np.array(m.grid, dtype=np.uint16)
     print(maze)
