@@ -119,8 +119,7 @@ int main(int argc, char* argv[]) {
     serial_timer.start();
     auto path = a_star(maze, start, goal);
     time_taken = serial_timer.stop();
-    cout << "Time taken: " << fixed << setprecision(TIME_PRECISION) << time_taken << " seconds" << endl;
-
+    
     if (!path.empty()) {
         cout << "Path taken: ";
         for (const auto& p : path) {
@@ -148,5 +147,6 @@ int main(int argc, char* argv[]) {
     } else {
         cout << "No path found!" << endl;
     }
+    cout << "Time taken: " << fixed << setprecision(TIME_PRECISION) << time_taken << " seconds" << endl;
     return 0;
 }

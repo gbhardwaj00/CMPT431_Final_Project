@@ -56,7 +56,7 @@ void master_process(vector<vector<uint16_t>>& maze, const Cell& start, const Cel
     Cell goal_cell(0, 0, 0, 0);
 
     // Main Loop
-    while (!open_list.empty() && !goal_found) {
+    while (!open_list.empty()) {
         // Get cell with lowest f_cost
         Cell current = open_list.top();
         open_list.pop();
@@ -80,7 +80,7 @@ void master_process(vector<vector<uint16_t>>& maze, const Cell& start, const Cel
             int num_neighbours;
             MPI_Recv(&num_neighbours, 1, MPI_INT, proc, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-            // Receive data for each neighbout
+            // Receive data for each neighbour
             for (int i = 0; i < num_neighbours; i++) {
                 int neighbour_data[4];
                 MPI_Recv(neighbour_data, 4, MPI_INT, proc, 0,  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -118,15 +118,33 @@ void master_process(vector<vector<uint16_t>>& maze, const Cell& start, const Cel
         }
         reverse(path.begin(), path.end());
 
-        // Output the path
-        cout << "Path found:\n";
+        printf("Path found:\n");
         for (const auto& p : path) {
-            cout << "(" << p.first << ", " << p.second << ") ";
+            printf("(%d, %d) ", p.first, p.second);
         }
-        cout << endl;
-    } else {
-        cout << "No path found!" << endl;
+        printf("\n");
+        // Render the maze with the path
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
+               if (make_pair(static_cast<int>(y), static_cast<int>(x)) == make_pair(static_cast<int>(start.y), static_cast<int>(start.x))) {
+                    printf("S"); // Start
+                } else if (make_pair(static_cast<int>(y), static_cast<int>(x)) == make_pair(static_cast<int>(goal.y), static_cast<int>(goal.x))) {
+                    printf("E"); // Goal
+                } else if (find(path.begin(), path.end(), make_pair(y, x)) != path.end()) {
+                    printf("*"); // Mark path
+                } else if (maze[y][x] & 1) {
+                    printf("#"); // Wall
+                } else {
+                    printf(" "); // Empty path
+                }
+            }
+            printf("\n");
+        }
     }
+    else {
+            printf("No path found!\n");
+    }
+
 }
 
 void worker_process(vector<vector<uint16_t>>& maze) {
@@ -186,7 +204,7 @@ void worker_process(vector<vector<uint16_t>>& maze) {
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
     
-    int rank, num_processes;
+    int rank;
     int size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -216,9 +234,8 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < rows; i++) {
             inputFile.read(reinterpret_cast<char*>(maze[i].data()), cols * sizeof(uint16_t));
         }
-        inputFile.close();
+        inputFile.close();  
     }
-    
     // Broadcast the maze to all processes
     for (int i = 0; i < rows; ++i) {
         MPI_Bcast(maze[i].data(), cols, MPI_UINT16_T, 0, MPI_COMM_WORLD);
@@ -229,9 +246,9 @@ int main(int argc, char* argv[]) {
         Cell start(1, 1, 0, calculate_heuristic(1, 1, rows - 2, cols - 2));
         Cell goal(rows - 2, cols - 2, 0, 0);
         double start_time = MPI_Wtime();
-        master_process(maze, start, goal, num_processes);
+        master_process(maze, start, goal, size);
         double end_time = MPI_Wtime();
-        cout << "Time taken: " << fixed << end_time - start_time << " seconds" << endl;
+        printf("Time taken: %.10f seconds\n", end_time - start_time);
     } else {
         // Worker processes
         worker_process(maze);
