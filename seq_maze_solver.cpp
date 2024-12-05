@@ -91,7 +91,8 @@ vector<pair<int, int>> a_star(vector<vector<uint16_t>>& maze,
 }
 
 int main(int argc, char* argv[]) {
-    uint16_t logical_size = stoi(argv[1]); // Logical size of the maze
+    // Logical size of the maze (excluding in-between wall positions)
+    uint16_t logical_size = stoi(argv[1]); 
     const uint16_t rows = 2 * logical_size + 1;
     const uint16_t cols = 2 * logical_size + 1; 
 
@@ -109,8 +110,9 @@ int main(int argc, char* argv[]) {
     }
     inputFile.close();
 
+    // Assigned start and goal positions
     pair<int, int> start = {1, 1}; 
-    pair<int, int> goal = {rows - 2, cols - 2}; // Goal is the bottom-right cell
+    pair<int, int> goal = {2 * logical_size - 1, 2 * logical_size - 1}; // Goal is the bottom-right cell
     
     timer serial_timer;
     double time_taken = 0.0;
@@ -120,11 +122,29 @@ int main(int argc, char* argv[]) {
     cout << "Time taken: " << fixed << setprecision(TIME_PRECISION) << time_taken << " seconds" << endl;
 
     if (!path.empty()) {
-        cout << "Path found:\n";
+        cout << "Path taken: ";
         for (const auto& p : path) {
             cout << "(" << p.first << ", " << p.second << ") ";
         }
         cout << endl;
+
+        // Render the maze with the path
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
+                if (make_pair(y, x) == start) {
+                    cout << "S"; // Start
+                } else if (make_pair(y, x) == goal) {
+                    cout << "E"; // Goal
+                } else if (find(path.begin(), path.end(), make_pair(y, x)) != path.end()) {
+                    cout << "*"; // Mark path
+                } else if (maze[y][x] & 1) {
+                    cout << "#"; // Wall
+                } else {
+                    cout << " "; // Empty path
+                }
+            }
+            cout << endl;
+        }
     } else {
         cout << "No path found!" << endl;
     }

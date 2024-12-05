@@ -167,8 +167,23 @@ int main(int argc, char* argv[]) {
             cout << "(" << p.first << ", " << p.second << ") ";
         }
         cout << endl;
-
-      
+        // Render the maze with the path
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
+                if (make_pair(y, x) == start) {
+                    cout << "S"; // Start
+                } else if (make_pair(y, x) == goal) {
+                    cout << "E"; // Goal
+                } else if (find(path.begin(), path.end(), make_pair(y, x)) != path.end()) {
+                    cout << "*"; // Mark path
+                } else if (maze[y][x] & 1) {
+                    cout << "#"; // Wall
+                } else {
+                    cout << " "; // Empty path
+                }
+            }
+            cout << endl;
+        }
     } else {
         cout << "No path found!" << endl;
     }
