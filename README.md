@@ -92,28 +92,12 @@ The **A* search algorithm** is used for pathfinding:
 - The **priority queue** selects the cell with the lowest `f_cost` and expands it.
 - The process continues until the goal is reached.
 
-## Example Output
-```
-S#############
-# * * * * *  #
-# # # # # #  #
-# * * * * *  #
-# #########  #
-# * * * * *E#
-#############
-```
-**Legend:**
-- `S` → Start Position
-- `E` → End Position
-- `*` → Path
-- `#` → Walls
-
 ## Performance Comparison
 | Implementation      | Execution Time (10x10 Maze) |
 |--------------------|---------------------------|
 | Serial            | 0.5s                        |
 | Multi-threaded    | 0.2s                        |
-| MPI (4 processes) | 0.1s                        |
+| MPI (4 processes) | 0.3s                        |
 
 ## References
 - [mazelib GitHub](https://github.com/john-science/mazelib)
